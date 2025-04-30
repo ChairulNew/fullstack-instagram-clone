@@ -14,6 +14,10 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+
+    plugins {
+        id("com.google.gms.google-services") version "4.3.15" apply false
+    }
 }
 
 plugins {
@@ -22,4 +26,5 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.8.22" apply false
 }
 
+// ✅ INI YANG KURANG
 include(":app")
