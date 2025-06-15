@@ -8,16 +8,18 @@ import 'package:fullstack_instagram_clone/screens/login_screen.dart';
 import 'package:fullstack_instagram_clone/screens/signup_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyDNKHCGIB6y9u_vpkTWqCOSWwB4bhCUtjs",
-        appId: "1:478361084693:web:b3ed5ef082b581ed77ff1c",
-        messagingSenderId: "478361084693",
-        projectId: "instagram-clone-14d27",
-        storageBucket: "instagram-clone-14d27.firebasestorage.app",
+        apiKey: "AIzaSyBxRHflMrMoXHWe4pEvMszX1rpdV2DXYsQ",
+        appId: "1:718394058282:android:5b06cfcc9e0f15a9b08553",
+        messagingSenderId: "718394058282",
+        projectId: "instagram-app-2279d",
+        storageBucket: "instagram-app-2279d.firebasestorage.app",
       ),
     );
   } else {
