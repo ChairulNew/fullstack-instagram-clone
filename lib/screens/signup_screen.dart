@@ -22,6 +22,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _usernameController = TextEditingController();
 
   Uint8List? _image;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -39,12 +40,49 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
+  void signUpUser() async {
+    // Validasi apakah image sudah dipilih
+    if (_image == null) {
+      showSnackBar(context, 'Please select a profile image');
+      return;
+    }
+
+    // Set loading state
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String res = await AuthMethods().singUpUser(
+        email: _emailController.text,
+        password: _passwordController.text,
+        username: _usernameController.text,
+        bio: _bioController.text,
+        file: _image!,
+      );
+
+      if (res == 'success') {
+        showSnackBar(context, 'Account created successfully!');
+        // Navigate to home screen atau login screen
+        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+      } else {
+        showSnackBar(context, res);
+      }
+    } catch (e) {
+      showSnackBar(context, 'An error occurred: ${e.toString()}');
+    }
+
+    // Reset loading state
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          // Agar bisa scroll saat keyboard muncul
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             width: double.infinity,
@@ -121,26 +159,28 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 // Tombol daftar
                 InkWell(
-                  onTap: () async {
-                    String res = await AuthMethods().singUpUser(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                      username: _usernameController.text,
-                      bio: _bioController.text,
-                      // file: _image,
-                    );
-                    print(res);
-                  },
+                  onTap: _isLoading ? null : signUpUser,
                   child: Container(
-                    child: const Text('Daftar'),
+                    child:
+                        _isLoading
+                            ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                            : const Text(
+                              'Daftar',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     width: double.infinity,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: const ShapeDecoration(
-                      shape: RoundedRectangleBorder(
+                    decoration: ShapeDecoration(
+                      shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
                       ),
-                      color: blueColor,
+                      color: _isLoading ? Colors.grey : blueColor,
                     ),
                   ),
                 ),
@@ -169,7 +209,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20), // Tambahan untuk jarak bawah
+                const SizedBox(height: 20),
               ],
             ),
           ),

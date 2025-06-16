@@ -12,7 +12,12 @@
           "package_name": "com.instagram.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "718394058282-72bds5dfepbm96l5mtmd5s831vn5469q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBxRHflMrMoXHWe4pEvMszX1rpdV2DXYsQ"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "718394058282-72bds5dfepbm96l5mtmd5s831vn5469q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

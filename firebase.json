@@ -1,1 +1,28 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"fullstack-instagram-clon-49944","appId":"1:1037391974349:android:50e831ba38e67052a17e84","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"fullstack-instagram-clon-49944","configurations":{"android":"1:1037391974349:android:50e831ba38e67052a17e84","ios":"1:1037391974349:ios:d10613d651afe61ca17e84","macos":"1:1037391974349:ios:d10613d651afe61ca17e84","web":"1:1037391974349:web:d16b569b54910d6ea17e84","windows":"1:1037391974349:web:bd36a8840000dba4a17e84"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fullstack-instagram-clon-49944",
+          "appId": "1:1037391974349:android:50e831ba38e67052a17e84",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fullstack-instagram-clon-49944",
+          "configurations": {
+            "android": "1:1037391974349:android:50e831ba38e67052a17e84",
+            "ios": "1:1037391974349:ios:d10613d651afe61ca17e84",
+            "macos": "1:1037391974349:ios:d10613d651afe61ca17e84",
+            "web": "1:1037391974349:web:d16b569b54910d6ea17e84",
+            "windows": "1:1037391974349:web:bd36a8840000dba4a17e84"
+          }
+        }
+      }
+    }
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
