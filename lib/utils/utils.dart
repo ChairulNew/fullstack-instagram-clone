@@ -12,7 +12,7 @@ showSnackBar(BuildContext context, String text) {
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(text),
-      backgroundColor: Colors.red,
+      backgroundColor: Colors.lightBlueAccent,
       duration: const Duration(seconds: 3),
     ),
   );

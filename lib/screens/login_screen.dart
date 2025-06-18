@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fullstack_instagram_clone/resources/auth_methods.dart';
+import 'package:fullstack_instagram_clone/responsive/mobile_screen_layout.dart';
+import 'package:fullstack_instagram_clone/responsive/responsive_layout_screen.dart';
+import 'package:fullstack_instagram_clone/responsive/web_screen_layout.dart';
+import 'package:fullstack_instagram_clone/screens/home_screen.dart';
+import 'package:fullstack_instagram_clone/screens/signup_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
+import 'package:fullstack_instagram_clone/utils/utils.dart';
 import 'package:fullstack_instagram_clone/widgets/text_field_input.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,15 +18,51 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // inisiasi textediting controller
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     super.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+  }
+
+  void loginUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    String res = await AuthMethods().loginUser(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (res == "success") {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder:
+              (context) => const ResponsiveLayout(
+                webScreenLayout: WebScreenLayout(),
+                mobileScreenLayout: MobileScreenLayout(),
+              ),
+        ),
+      );
+    } else {
+      showSnackBar(context, res);
+    }
+  }
+
+  // buat navigate ke signup
+  void navigateToSignUp() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => SignupScreen()));
   }
 
   @override
@@ -33,21 +76,18 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Flexible(child: Container(), flex: 2),
-              // gambar ig
               SvgPicture.asset(
                 "assets/instagram-logo.svg",
                 color: primaryColor,
                 height: 64,
               ),
               const SizedBox(height: 62),
-              // untuk text field email
               TextFieldInput(
                 hintText: "Masukkan email",
                 textInputType: TextInputType.emailAddress,
                 textEditingController: _emailController,
               ),
               const SizedBox(height: 24),
-              // untuk text field password
               TextFieldInput(
                 hintText: "Masukkan Password",
                 textInputType: TextInputType.text,
@@ -55,40 +95,58 @@ class _LoginScreenState extends State<LoginScreen> {
                 isPass: true,
               ),
               const SizedBox(height: 24),
-              // button login
               InkWell(
+                onTap: _isLoading ? null : loginUser,
                 child: Container(
-                  child: const Text('Log in'),
                   width: double.infinity,
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: const ShapeDecoration(
-                    shape: RoundedRectangleBorder(
+                  decoration: ShapeDecoration(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
-                    color: blueColor,
+                    color: _isLoading ? Colors.grey : blueColor,
                   ),
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : const Text(
+                            'Log in',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                 ),
               ),
               const SizedBox(height: 12),
               Flexible(child: Container(), flex: 2),
 
-              // transition for sign up
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    child: Text("Tidak memiliki akun? "),
-                    padding: EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: const Text("Tidak memiliki akun? "),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: navigateToSignUp,
                     child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       child: const Text(
                         "Daftar",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: blueColor,
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
                   ),
                 ],

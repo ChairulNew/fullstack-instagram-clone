@@ -3,14 +3,12 @@ plugins {
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
-    id("com.google.gms.google-services") // ✅ Plugin Google Services
 }
 
 android {
-    namespace = "com.example.fullstack_instagram_clone"
+    namespace = "com.instagram.app"
     compileSdk = flutter.compileSdkVersion
 
-    // ✅ Pakai NDK versi 27 sesuai kebutuhan Firebase plugin
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -23,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.fullstack_instagram_clone"
+        applicationId = "com.instagram.app"
 
         // ✅ Ganti dari flutter.minSdkVersion ke 23
         minSdk = 23

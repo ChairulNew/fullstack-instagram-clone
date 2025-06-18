@@ -3,9 +3,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fullstack_instagram_clone/resources/auth_methods.dart';
+import 'package:fullstack_instagram_clone/responsive/mobile_screen_layout.dart';
+import 'package:fullstack_instagram_clone/responsive/responsive_layout_screen.dart';
+import 'package:fullstack_instagram_clone/responsive/web_screen_layout.dart';
+import 'package:fullstack_instagram_clone/screens/login_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/utils/utils.dart';
 import 'package:fullstack_instagram_clone/widgets/text_field_input.dart';
+import 'package:image/image.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -61,10 +66,22 @@ class _SignupScreenState extends State<SignupScreen> {
         file: _image!,
       );
 
+      if (res != "success") {
+        showSnackBar(context, res);
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder:
+                (context) => const ResponsiveLayout(
+                  webScreenLayout: WebScreenLayout(),
+                  mobileScreenLayout: MobileScreenLayout(),
+                ),
+          ),
+        );
+      }
+
       if (res == 'success') {
         showSnackBar(context, 'Account created successfully!');
-        // Navigate to home screen atau login screen
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
       } else {
         showSnackBar(context, res);
       }
@@ -72,10 +89,19 @@ class _SignupScreenState extends State<SignupScreen> {
       showSnackBar(context, 'An error occurred: ${e.toString()}');
     }
 
+    // validasi jika daftar gagal
+
     // Reset loading state
     setState(() {
       _isLoading = false;
     });
+  }
+
+  // buat navigate ke login
+  void navigateToLogin() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
   @override
@@ -161,6 +187,15 @@ class _SignupScreenState extends State<SignupScreen> {
                 InkWell(
                   onTap: _isLoading ? null : signUpUser,
                   child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: ShapeDecoration(
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                      ),
+                      color: _isLoading ? Colors.grey : blueColor,
+                    ),
                     child:
                         _isLoading
                             ? const CircularProgressIndicator(
@@ -173,15 +208,6 @@ class _SignupScreenState extends State<SignupScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: ShapeDecoration(
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                      ),
-                      color: _isLoading ? Colors.grey : blueColor,
-                    ),
                   ),
                 ),
 
@@ -192,19 +218,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      child: const Text("Sudah memiliki akun? "),
                       padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: const Text("Sudah memiliki akun? "),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        // navigasi ke login
-                      },
+                      onTap: navigateToLogin,
                       child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         child: const Text(
                           "Masuk",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ],
