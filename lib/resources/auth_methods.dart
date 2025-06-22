@@ -3,11 +3,21 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fullstack_instagram_clone/model/user.dart' as model;
+import 'package:fullstack_instagram_clone/providers/user_provider.dart';
 // import 'package:flutter/material.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<model.UserModel> getUsersDetails() async {
+    User currentUser = _auth.currentUser!;
+    DocumentSnapshot snap =
+        await _firestore.collection('users').doc(currentUser.uid).get();
+
+    return model.UserModel.fromSnap(snap);
+  }
 
   Future<String> singUpUser({
     required String email,
@@ -18,12 +28,10 @@ class AuthMethods {
   }) async {
     String res = "some error occurred";
     try {
-      // Perbaikan logika kondisi - seharusnya AND (&&) bukan OR (||)
       if (email.isNotEmpty &&
           password.isNotEmpty &&
           username.isNotEmpty &&
           bio.isNotEmpty) {
-        // Lakukan registrasi
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
@@ -31,20 +39,24 @@ class AuthMethods {
 
         print("User UID: ${cred.user!.uid}");
 
-        // Convert image ke Base64 string untuk disimpan di Firestore
         String base64Image = base64Encode(file);
         String imageDataUrl = 'data:image/jpeg;base64,$base64Image';
 
-        // Add user to database dengan image sebagai Base64
-        await _firestore.collection('users').doc(cred.user!.uid).set({
-          'username': username,
-          'uid': cred.user!.uid,
-          'email': email,
-          'bio': bio,
-          'followers': [],
-          'following': [],
-          'photoUrl': imageDataUrl, // Simpan sebagai data URL
-        });
+        // tambah user ke firebase
+        model.UserModel user = model.UserModel(
+          username: username,
+          uid: cred.user!.uid,
+          email: email,
+          bio: bio,
+          photoUrl: imageDataUrl,
+          following: [],
+          followers: [],
+        );
+
+        await _firestore
+            .collection('users')
+            .doc(cred.user!.uid)
+            .set(user.toJson());
 
         res = 'success';
       } else {
