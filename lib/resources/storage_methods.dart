@@ -26,7 +26,7 @@ class StorageMethods {
       return downloadUrl;
     } catch (e) {
       print('Error uploading image: $e');
-      rethrow; // atau return string kosong/default sesuai kebutuhan
+      rethrow;
     }
   }
 }

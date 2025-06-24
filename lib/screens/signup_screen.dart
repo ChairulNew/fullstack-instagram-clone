@@ -89,8 +89,6 @@ class _SignupScreenState extends State<SignupScreen> {
       showSnackBar(context, 'An error occurred: ${e.toString()}');
     }
 
-    // validasi jika daftar gagal
-
     // Reset loading state
     setState(() {
       _isLoading = false;

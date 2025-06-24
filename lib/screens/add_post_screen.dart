@@ -72,6 +72,7 @@ class _MyWidgetState extends State<AddPostScreen> {
                   ),
                 ),
               ),
+              const Divider(),
             ],
           ),
         ],
