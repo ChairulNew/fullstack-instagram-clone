@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
+import 'package:fullstack_instagram_clone/utils/utils.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -9,11 +12,33 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<AddPostScreen> {
+  Uint8List? _file;
+  _selectImage(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return (SimpleDialog(
+          title: const Text("Simple dialog"),
+          children: [
+            SimpleDialogOption(
+              padding: EdgeInsets.all(20),
+              child: const Text("Ambil foto"),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                Uint8List file = await pickImage(ImageSource.camera);
+                setState(() {
+                  _file = file;
+                });
+              },
+            ),
+          ],
+        ));
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // return Center(
-    //   child: IconButton(onPressed: () {}, icon: Icon(Icons.upload)),
-    // );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: mobileBackgroundColor,
