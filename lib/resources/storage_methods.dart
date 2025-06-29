@@ -6,7 +6,6 @@ class StorageMethods {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // simpan image profile ke firebase
   Future<String> uploadImageToStorage(
     String childName,
     Uint8List file,

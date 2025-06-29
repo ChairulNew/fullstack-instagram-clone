@@ -1,0 +1,32 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#1c1f26",
+    "activityBar.background": "#1c1f26",
+    "activityBar.foreground": "#ffffffcc",
+    "activityBar.inactiveForeground": "#ffffff66",
+    "activityBarBadge.background": "#3b82f6",
+    "activityBarBadge.foreground": "#ffffff",
+
+    "commandCenter.border": "#2c2f36",
+    "sash.hoverBorder": "#3b82f6",
+
+    "statusBar.background": "#1f2937",
+    "statusBar.foreground": "#e5e7eb",
+    "statusBarItem.hoverBackground": "#374151",
+    "statusBarItem.remoteBackground": "#3b82f6",
+    "statusBarItem.remoteForeground": "#ffffff",
+
+    "titleBar.activeBackground": "#111827",
+    "titleBar.activeForeground": "#e5e7eb",
+    "titleBar.inactiveBackground": "#1f293780",
+    "titleBar.inactiveForeground": "#9ca3af",
+
+    "sideBar.background": "#1a1d23",
+    "sideBar.foreground": "#d1d5db",
+    "sideBarSectionHeader.background": "#1f2937",
+    "sideBarSectionHeader.foreground": "#e5e7eb"
+  },
+
+  "window.titleBarStyle": "custom",
+  "peacock.color": "#1e40af" // biru navy elegan
+}

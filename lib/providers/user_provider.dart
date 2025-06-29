@@ -6,7 +6,7 @@ class UserProvider with ChangeNotifier {
   UserModel? _user;
   final AuthMethods _authMethods = AuthMethods();
 
-  UserModel? get getUser => _user; // pakai nullable di sini
+  UserModel? get getUser => _user;
 
   Future<void> refreshUser() async {
     UserModel user = await _authMethods.getUsersDetails();
