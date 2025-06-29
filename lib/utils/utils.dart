@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 
-// Fungsi untuk menampilkan SnackBar
 showSnackBar(BuildContext context, String text) {
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -18,14 +17,12 @@ showSnackBar(BuildContext context, String text) {
   );
 }
 
-// Fungsi untuk compress gambar sebelum upload
 Future<Uint8List> compressImage(Uint8List imageBytes) async {
   // Decode image
   img.Image? image = img.decodeImage(imageBytes);
 
   if (image == null) return imageBytes;
 
-  // Resize image ke maksimal 512x512 (untuk profile picture)
   img.Image resized = img.copyResize(
     image,
     width: 512,
@@ -33,13 +30,11 @@ Future<Uint8List> compressImage(Uint8List imageBytes) async {
     interpolation: img.Interpolation.linear,
   );
 
-  // Compress dengan kualitas 70% (balance antara size dan quality)
   List<int> compressedBytes = img.encodeJpg(resized, quality: 70);
 
   return Uint8List.fromList(compressedBytes);
 }
 
-// Fungsi pick image yang sudah diupdate dengan compression
 pickImage(ImageSource source) async {
   final ImagePicker imagePicker = ImagePicker();
 

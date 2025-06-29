@@ -1,28 +1,67 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fullstack_instagram_clone/model/user.dart';
 import 'package:fullstack_instagram_clone/providers/user_provider.dart';
+import 'package:fullstack_instagram_clone/resources/firestore_method.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
-
 import 'package:provider/provider.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
 
   @override
-  State<AddPostScreen> createState() => _MyWidgetState();
+  State<AddPostScreen> createState() => _AddPostScreenState();
 }
 
-class _MyWidgetState extends State<AddPostScreen> {
+class _AddPostScreenState extends State<AddPostScreen> {
   Uint8List? _file;
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isLoading = false;
 
-  void postImage(String uid, String username, String profImage) async {
-    try {} catch (e) {}
+  void postImage(String uid, String username, String photoUrl) async {
+    if (_file == null) {
+      showSnackBar(context, 'Pilih gambar terlebih dahulu!');
+      return;
+    }
+
+    if (_descriptionController.text.trim().isEmpty) {
+      showSnackBar(context, 'Caption tidak boleh kosong!');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String res = await FirestoreMethods().uploadPost(
+        _descriptionController.text,
+        _file!,
+        uid,
+        username,
+        photoUrl,
+      );
+      print("response: $res");
+
+      if (res == "success") {
+        clearImage();
+        showSnackBar(context, 'Berhasil di post✅');
+        setState(() {
+          _file = null;
+          _descriptionController.clear();
+        });
+      } else {
+        showSnackBar(context, res);
+      }
+    } catch (e) {
+      showSnackBar(context, 'Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   _selectImage(BuildContext context) async {
@@ -30,7 +69,7 @@ class _MyWidgetState extends State<AddPostScreen> {
       context: context,
       builder: (context) {
         return SimpleDialog(
-          title: const Text("Simple dialog"),
+          title: const Text("Pilih Gambar"),
           children: [
             SimpleDialogOption(
               padding: const EdgeInsets.all(20),
@@ -45,7 +84,7 @@ class _MyWidgetState extends State<AddPostScreen> {
             ),
             SimpleDialogOption(
               padding: const EdgeInsets.all(20),
-              child: const Text("Ambil dari gallery"),
+              child: const Text("Ambil dari galeri"),
               onPressed: () async {
                 Navigator.of(context).pop();
                 Uint8List file = await pickImage(ImageSource.gallery);
@@ -57,9 +96,7 @@ class _MyWidgetState extends State<AddPostScreen> {
             SimpleDialogOption(
               padding: const EdgeInsets.all(20),
               child: const Text("Batal"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );
@@ -67,34 +104,49 @@ class _MyWidgetState extends State<AddPostScreen> {
     );
   }
 
+  void clearImage() {
+    setState(() {
+      _file = null;
+    });
+  }
+
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
     _descriptionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final UserModel? user = Provider.of<UserProvider>(context).getUser;
+
+    if (user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return _file == null
         ? Center(
           child: IconButton(
+            icon: const Icon(Icons.upload),
             onPressed: () => _selectImage(context),
-            icon: Icon(Icons.upload),
           ),
         )
         : Scaffold(
           appBar: AppBar(
             backgroundColor: mobileBackgroundColor,
             leading: IconButton(
-              onPressed: () {},
               icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  _file = null;
+                });
+              },
             ),
             title: const Text("Post To"),
             actions: [
               TextButton(
-                onPressed: postImage,
+                onPressed:
+                    () => postImage(user.uid, user.username, user.photoUrl),
                 child: const Text(
                   "Post",
                   style: TextStyle(
@@ -108,17 +160,21 @@ class _MyWidgetState extends State<AddPostScreen> {
           ),
           body: Column(
             children: [
+              _isLoading
+                  ? const LinearProgressIndicator()
+                  : Padding(padding: EdgeInsets.only(top: 0)),
+              const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(backgroundImage: NetworkImage(user!.photoUrl)),
+                  CircleAvatar(backgroundImage: NetworkImage(user.photoUrl)),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.3,
                     child: TextField(
                       controller: _descriptionController,
-                      decoration: InputDecoration(
-                        hintText: "tulis sebuah caption...",
+                      decoration: const InputDecoration(
+                        hintText: "Tulis caption...",
                         border: InputBorder.none,
                       ),
                       maxLines: 8,
@@ -133,7 +189,7 @@ class _MyWidgetState extends State<AddPostScreen> {
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: MemoryImage(_file!),
-                            fit: BoxFit.fill,
+                            fit: BoxFit.cover,
                             alignment: FractionalOffset.topCenter,
                           ),
                         ),
@@ -142,6 +198,7 @@ class _MyWidgetState extends State<AddPostScreen> {
                   ),
                 ],
               ),
+              const Divider(),
             ],
           ),
         );

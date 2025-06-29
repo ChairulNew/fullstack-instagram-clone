@@ -18,16 +18,13 @@ void main() async {
   try {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
-        options:
-            kIsWeb
-                ? const FirebaseOptions(
-                  apiKey: "AIzaSyBxRHflMrMoXHWe4pEvMszX1rpdV2DXYsQ",
-                  appId: "1:718394058282:android:5b06cfcc9e0f15a9b08553",
-                  messagingSenderId: "718394058282",
-                  projectId: "instagram-app-2279d",
-                  storageBucket: "instagram-app-2279d.firebasestorage.app",
-                )
-                : DefaultFirebaseOptions.currentPlatform,
+        options: const FirebaseOptions(
+          apiKey: "AIzaSyBxRHflMrMoXHWe4pEvMszX1rpdV2DXYsQ",
+          appId: "1:718394058282:android:5b06cfcc9e0f15a9b08553",
+          messagingSenderId: "718394058282",
+          projectId: "instagram-app-2279d",
+          storageBucket: "instagram-app-2279d.appspot.com",
+        ),
       );
     }
   } catch (e) {
