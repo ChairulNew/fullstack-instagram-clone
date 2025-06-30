@@ -34,9 +34,8 @@ class FirestoreMethods {
       print('original profilImage: $profilImage');
       print('final profilImage length: ${finalprofilImage.length}');
       print(
-        'final profilImage preview: ${finalprofilImage.length > 50 ? finalprofilImage.substring(0, 50) + "..." : finalprofilImage}',
+        'final profilImage preview: ${finalprofilImage.length > 50 ? "${finalprofilImage.substring(0, 50)}..." : finalprofilImage}',
       );
-      print('========================');
 
       String postId = const Uuid().v1();
 
