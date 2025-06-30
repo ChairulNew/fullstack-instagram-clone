@@ -1,8 +1,22 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 
 class PostCard extends StatelessWidget {
-  const PostCard({super.key});
+  final snap;
+  String _formatDate(dynamic timestamp) {
+    if (timestamp == null || timestamp is! Timestamp) {
+      return 'Unknown';
+    }
+
+    final date = timestamp.toDate();
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  const PostCard({Key? key, required this.snap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,20 +34,17 @@ class PostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundImage: NetworkImage(
-                    "https://images.unsplash.com/photo-1565687981296-535f09db714e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                  ),
+                  backgroundImage: _buildProfileImage(snap['profilImage']),
                 ),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.only(left: 8),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Username",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          snap['username'] ?? "Username",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -49,107 +60,98 @@ class PostCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shrinkWrap: true,
                               children:
-                                  ["Hapus"]
-                                      .map(
-                                        (e) => InkWell(
-                                          onTap: () {},
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
-                                              horizontal: 16,
-                                            ),
-                                            child: Text(e),
-                                          ),
+                                  ["Hapus"].map((e) {
+                                    return InkWell(
+                                      onTap: () {},
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                          horizontal: 16,
                                         ),
-                                      )
-                                      .toList(),
+                                        child: Text(e),
+                                      ),
+                                    );
+                                  }).toList(),
                             ),
                           ),
                     );
                   },
-                  icon: Icon(Icons.more_vert_outlined),
+                  icon: const Icon(Icons.more_vert_outlined),
                 ),
               ],
             ),
           ),
+
+          // Post image
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.35,
             width: double.infinity,
-            child: Image.network(
-              "https://images.unsplash.com/photo-1555066931-bf19f8fd1085?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-              fit: BoxFit.cover,
-            ),
+            child: _buildPostImage(snap['postUrl']),
           ),
-          // like dan komen section
+
+          // Actions
           Row(
             children: [
               IconButton(
                 onPressed: () {},
-                icon: Icon(Icons.favorite, color: Colors.redAccent),
+                icon: const Icon(Icons.favorite, color: Colors.redAccent),
               ),
-              IconButton(onPressed: () {}, icon: Icon(Icons.comment_outlined)),
-              IconButton(onPressed: () {}, icon: Icon(Icons.send)),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.bookmark_border),
-                  ),
-                ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.comment_outlined),
+              ),
+              IconButton(onPressed: () {}, icon: const Icon(Icons.send)),
+              const Spacer(),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.bookmark_border),
               ),
             ],
           ),
-          // deskripsi dan komen
+
+          // Caption and metadata
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DefaultTextStyle(
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w800),
-                  child: Text(
-                    '1.211 likes',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  child: Text('1.211 likes'),
                 ),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 8),
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(color: primaryColor),
+                      style: const TextStyle(color: primaryColor),
                       children: [
                         TextSpan(
-                          text: "username",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          text: snap['username'] ?? "username",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: " This is description"),
+                        TextSpan(
+                          text: " ${snap['description'] ?? 'No caption'}",
+                        ),
                       ],
                     ),
                   ),
                 ),
-
-                // comment section
                 InkWell(
                   onTap: () {},
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: const Text(
                       "lihat semua 200 komen",
                       style: TextStyle(fontSize: 12, color: secondaryColor),
                     ),
                   ),
                 ),
-                Container(
-                  // padding: EdgeInsets.symmetric(vertical: 2),
-                  child: Text(
-                    "30/6/2025",
-                    style: TextStyle(fontSize: 12, color: secondaryColor),
-                  ),
+                Text(
+                  _formatDate(snap['datePublished']),
+                  style: const TextStyle(fontSize: 12, color: secondaryColor),
                 ),
               ],
             ),
@@ -157,5 +159,54 @@ class PostCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Helper untuk gambar profil (base64, URL, atau fallback default)
+  ImageProvider _buildProfileImage(String? imageString) {
+    const defaultUrl =
+        'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
+
+    if (imageString == null || imageString.trim().isEmpty) {
+      return const NetworkImage(defaultUrl);
+    }
+
+    if (imageString.startsWith('data:image')) {
+      try {
+        final base64Data = imageString.split(',').last;
+        Uint8List bytes = base64Decode(base64Data);
+        return MemoryImage(bytes);
+      } catch (_) {
+        return const NetworkImage(defaultUrl);
+      }
+    }
+
+    if (imageString.startsWith('http')) {
+      return NetworkImage(imageString);
+    }
+
+    return const NetworkImage(defaultUrl);
+  }
+
+  /// Helper untuk gambar postingan (base64 atau URL)
+  Widget _buildPostImage(String? postUrl) {
+    if (postUrl == null) {
+      return const Center(child: Icon(Icons.image_not_supported));
+    }
+
+    if (postUrl.startsWith('data:image')) {
+      try {
+        final base64Data = postUrl.split(',').last;
+        Uint8List bytes = base64Decode(base64Data);
+        return Image.memory(bytes, fit: BoxFit.cover);
+      } catch (_) {
+        return const Center(child: Icon(Icons.broken_image));
+      }
+    }
+
+    if (postUrl.startsWith('http')) {
+      return Image.network(postUrl, fit: BoxFit.cover);
+    }
+
+    return const Center(child: Icon(Icons.image));
   }
 }
