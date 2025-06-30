@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fullstack_instagram_clone/model/user.dart';
 import 'package:fullstack_instagram_clone/providers/user_provider.dart';
@@ -76,10 +78,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
               child: const Text("Ambil foto"),
               onPressed: () async {
                 Navigator.of(context).pop();
-                Uint8List file = await pickImage(ImageSource.camera);
-                setState(() {
-                  _file = file;
-                });
+                Uint8List? file = await pickImage(ImageSource.camera);
+                if (file != null) {
+                  setState(() {
+                    _file = file;
+                  });
+                } else {
+                  showSnackBar(context, 'Gagal mengambil gambar.');
+                }
               },
             ),
             SimpleDialogOption(
@@ -87,10 +93,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
               child: const Text("Ambil dari galeri"),
               onPressed: () async {
                 Navigator.of(context).pop();
-                Uint8List file = await pickImage(ImageSource.gallery);
-                setState(() {
-                  _file = file;
-                });
+                Uint8List? file = await pickImage(ImageSource.gallery);
+                if (file != null) {
+                  setState(() {
+                    _file = file;
+                  });
+                } else {
+                  showSnackBar(context, 'Gagal memilih gambar.');
+                }
               },
             ),
             SimpleDialogOption(
@@ -162,13 +172,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
             children: [
               _isLoading
                   ? const LinearProgressIndicator()
-                  : Padding(padding: EdgeInsets.only(top: 0)),
+                  : const SizedBox.shrink(),
               const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(backgroundImage: NetworkImage(user.photoUrl)),
+                  CircleAvatar(
+                    backgroundImage: _buildProfileImage(user.photoUrl),
+                  ),
+
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.3,
                     child: TextField(
@@ -203,4 +216,29 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
         );
   }
+}
+
+ImageProvider _buildProfileImage(String? imageString) {
+  const defaultUrl =
+      'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
+
+  if (imageString == null || imageString.trim().isEmpty) {
+    return const NetworkImage(defaultUrl);
+  }
+
+  if (imageString.startsWith('data:image')) {
+    try {
+      final base64Data = imageString.split(',').last;
+      Uint8List bytes = base64Decode(base64Data);
+      return MemoryImage(bytes);
+    } catch (_) {
+      return const NetworkImage(defaultUrl);
+    }
+  }
+
+  if (imageString.startsWith('http')) {
+    return NetworkImage(imageString);
+  }
+
+  return const NetworkImage(defaultUrl);
 }

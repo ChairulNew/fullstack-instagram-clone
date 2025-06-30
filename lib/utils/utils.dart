@@ -32,7 +32,7 @@ Future<Uint8List> compressImage(Uint8List imageBytes) async {
   return Uint8List.fromList(compressedBytes);
 }
 
-pickImage(ImageSource source) async {
+Future<Uint8List?> pickImage(ImageSource source) async {
   final ImagePicker imagePicker = ImagePicker();
 
   XFile? _file = await imagePicker.pickImage(
@@ -45,5 +45,7 @@ pickImage(ImageSource source) async {
   if (_file != null) {
     return await _file.readAsBytes();
   }
+
   print("NO image selected");
+  return null; // penting agar bisa di-handle di UI
 }

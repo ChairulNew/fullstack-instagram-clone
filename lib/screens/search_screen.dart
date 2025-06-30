@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -41,58 +42,83 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       ),
       body:
-          searchText.isEmpty
-              ? const Center(child: Text('Masukkan username untuk mencari.'))
-              : FutureBuilder(
-                future:
-                    FirebaseFirestore.instance
-                        .collection('users')
-                        .where('username', isGreaterThanOrEqualTo: searchText)
-                        .where(
-                          'username',
-                          isLessThanOrEqualTo: '$searchText\uf8ff',
-                        )
-                        .get(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  var docs = snapshot.data!.docs;
-
-                  if (docs.isEmpty) {
-                    return const Center(
-                      child: Text('Pengguna tidak ditemukan.'),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      var user = docs[index].data();
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: _buildProfileImage(user['photoUrl']),
-                        ),
-                        title: Text(user['username']),
-                        subtitle: Text(user['email'] ?? ''),
-                      );
-                    },
-                  );
-                },
-              ),
+          searchText.isNotEmpty
+              ? _buildUserSearchResult()
+              : _buildExploreGrid(),
     );
   }
 
-  /// Helper untuk menampilkan foto profil (base64, URL, atau fallback default)
+  Widget _buildUserSearchResult() {
+    return FutureBuilder(
+      future:
+          FirebaseFirestore.instance
+              .collection('users')
+              .where('username', isGreaterThanOrEqualTo: searchText)
+              .where('username', isLessThanOrEqualTo: '$searchText\uf8ff')
+              .get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        var docs = snapshot.data!.docs;
+
+        if (docs.isEmpty) {
+          return const Center(child: Text('Pengguna tidak ditemukan.'));
+        }
+
+        return ListView.builder(
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            var user = docs[index].data();
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: _buildProfileImage(user['photoUrl']),
+              ),
+              title: Text(user['username'] ?? ''),
+              subtitle: Text(user['email'] ?? ''),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildExploreGrid() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final posts = snapshot.data!.docs;
+        return Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: MasonryGridView.count(
+            crossAxisCount: 3,
+            mainAxisSpacing: 4,
+            crossAxisSpacing: 4,
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final data = posts[index].data() as Map<String, dynamic>;
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: _buildPostImage(data['postUrl']),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   ImageProvider _buildProfileImage(String? imageString) {
     const defaultUrl =
         'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
-
     if (imageString == null || imageString.trim().isEmpty) {
       return const NetworkImage(defaultUrl);
     }
-
     if (imageString.startsWith('data:image')) {
       try {
         final base64Data = imageString.split(',').last;
@@ -102,11 +128,25 @@ class _SearchScreenState extends State<SearchScreen> {
         return const NetworkImage(defaultUrl);
       }
     }
-
     if (imageString.startsWith('http')) {
       return NetworkImage(imageString);
     }
-
     return const NetworkImage(defaultUrl);
+  }
+
+  Widget _buildPostImage(String? postUrl) {
+    if (postUrl == null) {
+      return const Icon(Icons.broken_image);
+    }
+    if (postUrl.startsWith('data:image')) {
+      try {
+        final base64Data = postUrl.split(',').last;
+        Uint8List bytes = base64Decode(base64Data);
+        return Image.memory(bytes, fit: BoxFit.cover);
+      } catch (_) {
+        return const Icon(Icons.error);
+      }
+    }
+    return Image.network(postUrl, fit: BoxFit.cover);
   }
 }
