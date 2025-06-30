@@ -7,7 +7,7 @@ class Post {
   final String postId;
   final DateTime datePublished;
   final String postUrl;
-  final String profImage; // Pastikan ini tidak nullable
+  final String profilImage; // Pastikan ini tidak nullable
   final List likes;
 
   const Post({
@@ -17,7 +17,7 @@ class Post {
     required this.postId,
     required this.datePublished,
     required this.postUrl,
-    required this.profImage,
+    required this.profilImage,
     required this.likes,
   });
 
@@ -28,7 +28,7 @@ class Post {
     "postId": postId,
     "datePublished": datePublished,
     "postUrl": postUrl,
-    "profImage": profImage, // Pastikan ini tidak null
+    "profilImage": profilImage, // Pastikan ini tidak null
     "likes": likes,
   };
 
@@ -43,8 +43,8 @@ class Post {
       datePublished:
           (snapshot['datePublished'] as Timestamp?)?.toDate() ?? DateTime.now(),
       postUrl: snapshot['postUrl'] ?? '',
-      profImage:
-          snapshot['profImage'] ??
+      profilImage:
+          snapshot['profilImage'] ??
           '', // Handle null dengan default empty string
       likes: List.from(snapshot['likes'] ?? []),
     );
@@ -62,7 +62,8 @@ class Post {
               ? (map['datePublished'] as Timestamp).toDate()
               : DateTime.now(),
       postUrl: (map['postUrl'] as String?) ?? '',
-      profImage: (map['profImage'] as String?) ?? '', // Default empty string
+      profilImage:
+          (map['profilImage'] as String?) ?? '', // Default empty string
       likes: List.from(map['likes'] ?? []),
     );
   }
@@ -75,7 +76,7 @@ class Post {
     String? postId,
     DateTime? datePublished,
     String? postUrl,
-    String? profImage,
+    String? profilImage,
     List? likes,
   }) {
     return Post(
@@ -85,13 +86,13 @@ class Post {
       postId: postId ?? this.postId,
       datePublished: datePublished ?? this.datePublished,
       postUrl: postUrl ?? this.postUrl,
-      profImage: profImage ?? this.profImage,
+      profilImage: profilImage ?? this.profilImage,
       likes: likes ?? this.likes,
     );
   }
 
   @override
   String toString() {
-    return 'Post(description: $description, uid: $uid, username: $username, postId: $postId, datePublished: $datePublished, postUrl: ${postUrl.length > 50 ? postUrl.substring(0, 50) + "..." : postUrl}, profImage: ${profImage.length > 50 ? profImage.substring(0, 50) + "..." : profImage}, likes: $likes)';
+    return 'Post(description: $description, uid: $uid, username: $username, postId: $postId, datePublished: $datePublished, postUrl: ${postUrl.length > 50 ? postUrl.substring(0, 50) + "..." : postUrl}, profilImage: ${profilImage.length > 50 ? profilImage.substring(0, 50) + "..." : profilImage}, likes: $likes)';
   }
 }

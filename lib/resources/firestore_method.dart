@@ -14,7 +14,7 @@ class FirestoreMethods {
     Uint8List file,
     String uid,
     String username,
-    String profImage,
+    String profilImage,
   ) async {
     String res = "some error occurred";
     try {
@@ -30,21 +30,21 @@ class FirestoreMethods {
       // Convert image to base64
       String photoUrl = 'data:image/jpeg;base64,${base64Encode(file)}';
 
-      // Handle profImage - jika kosong, coba ambil dari user profile
-      String finalProfImage = profImage;
-      if (profImage.isEmpty || profImage.trim().isEmpty) {
-        print('profImage is empty, trying to fetch from user profile...');
-        finalProfImage = await _getUserProfileImage(uid) ?? '';
+      // Handle profilImage - jika kosong, coba ambil dari user profile
+      String finalprofilImage = profilImage;
+      if (profilImage.isEmpty || profilImage.trim().isEmpty) {
+        print('profilImage is empty, trying to fetch from user profile...');
+        finalprofilImage = await _getUserProfileImage(uid) ?? '';
       }
 
       // Debug prints
       print('=== UPLOAD POST DEBUG ===');
       print('uid: $uid');
       print('username: $username');
-      print('original profImage: $profImage');
-      print('final profImage length: ${finalProfImage.length}');
+      print('original profilImage: $profilImage');
+      print('final profilImage length: ${finalprofilImage.length}');
       print(
-        'final profImage preview: ${finalProfImage.length > 50 ? finalProfImage.substring(0, 50) + "..." : finalProfImage}',
+        'final profilImage preview: ${finalprofilImage.length > 50 ? finalprofilImage.substring(0, 50) + "..." : finalprofilImage}',
       );
       print('========================');
 
@@ -58,8 +58,8 @@ class FirestoreMethods {
         postId: postId,
         datePublished: DateTime.now(),
         postUrl: photoUrl,
-        profImage:
-            finalProfImage, // Gunakan finalProfImage yang sudah divalidasi
+        profilImage:
+            finalprofilImage, // Gunakan finalprofilImage yang sudah divalidasi
         likes: [],
       );
 
@@ -67,9 +67,9 @@ class FirestoreMethods {
       Map<String, dynamic> postJson = post.toJson();
 
       // Validate crucial fields before saving
-      if (postJson['profImage'] == null) {
-        print('Warning: profImage is null in JSON, setting empty string');
-        postJson['profImage'] = '';
+      if (postJson['profilImage'] == null) {
+        print('Warning: profilImage is null in JSON, setting empty string');
+        postJson['profilImage'] = '';
       }
 
       // Debug print final JSON
@@ -82,7 +82,7 @@ class FirestoreMethods {
       DocumentSnapshot savedDoc =
           await _firestore.collection('posts').doc(postId).get();
       Map<String, dynamic> savedData = savedDoc.data() as Map<String, dynamic>;
-      print('Verified saved profImage: ${savedData['profImage']}');
+      print('Verified saved profilImage: ${savedData['profilImage']}');
 
       res = "success";
     } catch (err) {
@@ -115,14 +115,14 @@ class FirestoreMethods {
     return null;
   }
 
-  /// Fungsi helper untuk update profImage pada post yang sudah ada
+  /// Fungsi helper untuk update profilImage pada post yang sudah ada
   Future<String> updatePostProfileImage(
     String postId,
-    String newProfImage,
+    String newprofilImage,
   ) async {
     try {
       await _firestore.collection('posts').doc(postId).update({
-        'profImage': newProfImage,
+        'profilImage': newprofilImage,
       });
       return "success";
     } catch (e) {
@@ -139,13 +139,13 @@ class FirestoreMethods {
         .snapshots();
   }
 
-  /// Fungsi untuk fix semua posts yang memiliki profImage kosong
+  /// Fungsi untuk fix semua posts yang memiliki profilImage kosong
   Future<void> fixAllPostsProfileImages() async {
     try {
       QuerySnapshot postsSnapshot =
           await _firestore
               .collection('posts')
-              .where('profImage', whereIn: [null, '', ' '])
+              .where('profilImage', whereIn: [null, '', ' '])
               .get();
 
       for (DocumentSnapshot doc in postsSnapshot.docs) {
@@ -153,11 +153,11 @@ class FirestoreMethods {
         String uid = postData['uid'] ?? '';
 
         if (uid.isNotEmpty) {
-          String? userProfImage = await _getUserProfileImage(uid);
+          String? userProfilImage = await _getUserProfileImage(uid);
 
-          if (userProfImage != null && userProfImage.isNotEmpty) {
-            await doc.reference.update({'profImage': userProfImage});
-            print('Updated profImage for post: ${doc.id}');
+          if (userProfilImage != null && userProfilImage.isNotEmpty) {
+            await doc.reference.update({'profilImage': userProfilImage});
+            print('Updated profilImage for post: ${doc.id}');
           }
         }
       }

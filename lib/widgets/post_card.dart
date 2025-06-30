@@ -34,7 +34,7 @@ class PostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundImage: _buildProfileImage(snap['profilImage']),
+                  backgroundImage: _buildProfilImage(snap['profilImage']),
                 ),
                 Expanded(
                   child: Padding(
@@ -82,14 +82,12 @@ class PostCard extends StatelessWidget {
             ),
           ),
 
-          // Post image
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.35,
             width: double.infinity,
             child: _buildPostImage(snap['postUrl']),
           ),
 
-          // Actions
           Row(
             children: [
               IconButton(
@@ -162,7 +160,7 @@ class PostCard extends StatelessWidget {
   }
 
   /// Helper untuk gambar profil (base64, URL, atau fallback default)
-  ImageProvider _buildProfileImage(String? imageString) {
+  ImageProvider _buildProfilImage(String? imageString) {
     const defaultUrl =
         'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
 

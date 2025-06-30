@@ -83,8 +83,8 @@ class _FeedScreenState extends State<FeedScreen> {
               print('=== POST $index ===');
               print('Document ID: ${doc.id}');
               print('Raw data: $postData');
-              print('profImage field: ${postData['profImage']}');
-              print('profImage type: ${postData['profImage'].runtimeType}');
+              print('profilImage field: ${postData['profilImage']}');
+              print('profilImage type: ${postData['profilImage'].runtimeType}');
               print('==================');
 
               Map<String, dynamic> enrichedData = _enrichPostData(
@@ -109,20 +109,20 @@ class _FeedScreenState extends State<FeedScreen> {
   ) {
     Map<String, dynamic> enrichedData = Map<String, dynamic>.from(originalData);
 
-    if (enrichedData['profImage'] == null ||
-        enrichedData['profImage'].toString().trim().isEmpty) {
-      print('profImage is null/empty for doc: $docId');
+    if (enrichedData['profilImage'] == null ||
+        enrichedData['profilImage'].toString().trim().isEmpty) {
+      print('profilImage is null/empty for doc: $docId');
 
-      // Coba ambil profImage dari user collection berdasarkan uid
-      _fetchUserProfileImage(enrichedData['uid']).then((userProfImage) {
-        if (userProfImage != null) {
-          print('Found profImage from users collection: $userProfImage');
+      // Coba ambil profilImage dari user collection berdasarkan uid
+      _fetchUserProfileImage(enrichedData['uid']).then((userProfilImage) {
+        if (userProfilImage != null) {
+          print('Found profilImage from users collection: $userProfilImage');
           // Update akan terjadi pada build selanjutnya
         }
       });
 
       // Set default untuk sementara
-      enrichedData['profImage'] = null;
+      enrichedData['profilImage'] = null;
     }
 
     // Ensure required fields exist
@@ -138,7 +138,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return enrichedData;
   }
 
-  /// Fungsi untuk mengambil profImage dari collection users
+  /// Fungsi untuk mengambil profilImage dari collection users
   Future<String?> _fetchUserProfileImage(String? uid) async {
     if (uid == null || uid.isEmpty) return null;
 
