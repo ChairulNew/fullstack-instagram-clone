@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fullstack_instagram_clone/providers/user_provider.dart';
 import 'package:fullstack_instagram_clone/resources/firestore_method.dart';
+import 'package:fullstack_instagram_clone/screens/comments_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/widgets/like_animation.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,6 @@ class _PostCardState extends State<PostCard> {
     if (timestamp == null || timestamp is! Timestamp) {
       return 'Unknown';
     }
-
     final date = timestamp.toDate();
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -63,34 +63,56 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder:
-                          (context) => Dialog(
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shrinkWrap: true,
-                              children:
-                                  ["Hapus"].map((e) {
-                                    return InkWell(
-                                      onTap: () {},
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                          horizontal: 16,
-                                        ),
-                                        child: Text(e),
-                                      ),
+                if (user != null && widget.snap['uid'] == user.uid)
+                  IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text("Konfirmasi"),
+                              content: const Text(
+                                "Yakin ingin menghapus postingan ini?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text("Batal"),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    await FirestoreMethods().deletePost(
+                                      widget.snap['postId'],
                                     );
-                                  }).toList(),
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text(
+                                    "Hapus",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                    );
-                  },
-                  icon: const Icon(Icons.more_vert_outlined),
-                ),
+                      );
+                    },
+                    icon: const Icon(Icons.more_vert_outlined),
+                  )
+                else
+                  IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder:
+                            (context) => const AlertDialog(
+                              title: Text("Akses Ditolak"),
+                              content: Text(
+                                "Kamu tidak bisa menghapus postingan orang lain.",
+                              ),
+                            ),
+                      );
+                    },
+                    icon: const Icon(Icons.more_vert_outlined),
+                  ),
               ],
             ),
           ),
@@ -100,8 +122,6 @@ class _PostCardState extends State<PostCard> {
               setState(() {
                 isLikeAnimiting = true;
               });
-
-              // Kirim like ke Firebase
               await FirestoreMethods().likePost(
                 widget.snap['postId'],
                 user!.uid,
@@ -111,9 +131,8 @@ class _PostCardState extends State<PostCard> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.35,
-                  width: double.infinity,
+                AspectRatio(
+                  aspectRatio: 1,
                   child: _buildPostImage(widget.snap['postUrl']),
                 ),
                 AnimatedOpacity(
@@ -145,7 +164,6 @@ class _PostCardState extends State<PostCard> {
                 smallLike: true,
                 child: IconButton(
                   onPressed: () async {
-                    print("Like button pressed by ${user?.uid}");
                     if (user != null) {
                       await FirestoreMethods().likePost(
                         widget.snap['postId'],
@@ -163,9 +181,15 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
               ),
-
               IconButton(
-                onPressed: () {},
+                onPressed:
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                CommentsScreen(postId: widget.snap['postId']),
+                      ),
+                    ),
                 icon: const Icon(Icons.comment_outlined),
               ),
               IconButton(onPressed: () {}, icon: const Icon(Icons.send)),
@@ -177,7 +201,6 @@ class _PostCardState extends State<PostCard> {
             ],
           ),
 
-          // Caption and metadata
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -208,15 +231,40 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                 ),
-                InkWell(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: const Text(
-                      "lihat semua 200 komen",
-                      style: TextStyle(fontSize: 12, color: secondaryColor),
-                    ),
-                  ),
+                StreamBuilder<QuerySnapshot>(
+                  stream:
+                      FirebaseFirestore.instance
+                          .collection('posts')
+                          .doc(widget.snap['postId'])
+                          .collection('comments')
+                          .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const SizedBox.shrink();
+                    }
+                    int commentCount = snapshot.data!.docs.length;
+                    return InkWell(
+                      onTap:
+                          () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => CommentsScreen(
+                                    postId: widget.snap['postId'],
+                                  ),
+                            ),
+                          ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          'Lihat semua $commentCount komen',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: secondaryColor,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 Text(
                   _formatDate(widget.snap['datePublished']),
@@ -230,15 +278,11 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  /// Helper untuk gambar profil (base64, URL, atau fallback default)
   ImageProvider _buildProfilImage(String? imageString) {
     const defaultUrl =
         'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
-
-    if (imageString == null || imageString.trim().isEmpty) {
+    if (imageString == null || imageString.trim().isEmpty)
       return const NetworkImage(defaultUrl);
-    }
-
     if (imageString.startsWith('data:image')) {
       try {
         final base64Data = imageString.split(',').last;
@@ -248,34 +292,35 @@ class _PostCardState extends State<PostCard> {
         return const NetworkImage(defaultUrl);
       }
     }
-
-    if (imageString.startsWith('http')) {
-      return NetworkImage(imageString);
-    }
-
+    if (imageString.startsWith('http')) return NetworkImage(imageString);
     return const NetworkImage(defaultUrl);
   }
 
-  /// Helper untuk gambar postingan (base64 atau URL)
   Widget _buildPostImage(String? postUrl) {
-    if (postUrl == null) {
+    if (postUrl == null)
       return const Center(child: Icon(Icons.image_not_supported));
-    }
-
     if (postUrl.startsWith('data:image')) {
       try {
         final base64Data = postUrl.split(',').last;
         Uint8List bytes = base64Decode(base64Data);
-        return Image.memory(bytes, fit: BoxFit.cover);
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          width: double.infinity,
+        );
       } catch (_) {
         return const Center(child: Icon(Icons.broken_image));
       }
     }
-
     if (postUrl.startsWith('http')) {
-      return Image.network(postUrl, fit: BoxFit.cover);
+      return Image.network(
+        postUrl,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        width: double.infinity,
+      );
     }
-
     return const Center(child: Icon(Icons.image));
   }
 }

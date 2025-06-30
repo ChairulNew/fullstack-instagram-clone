@@ -45,6 +45,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
     if (userProvider.getUser == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    // ignore: unused_local_variable
     final UserModel? user = userProvider.getUser;
     return Scaffold(
       body: PageView(

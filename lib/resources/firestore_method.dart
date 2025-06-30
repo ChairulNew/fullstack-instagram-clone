@@ -17,14 +17,8 @@ class FirestoreMethods {
   ) async {
     String res = "some error occurred";
     try {
-      // Validate inputs
-      if (uid.isEmpty) {
-        return "Error: User ID is required";
-      }
-
-      if (username.isEmpty) {
-        return "Error: Username is required";
-      }
+      if (uid.isEmpty) return "Error: User ID is required";
+      if (username.isEmpty) return "Error: Username is required";
 
       String photoUrl = 'data:image/jpeg;base64,${base64Encode(file)}';
 
@@ -34,7 +28,6 @@ class FirestoreMethods {
         finalprofilImage = await _getUserProfileImage(uid) ?? '';
       }
 
-      // Debug prints
       print('=== UPLOAD POST DEBUG ===');
       print('uid: $uid');
       print('username: $username');
@@ -47,7 +40,6 @@ class FirestoreMethods {
 
       String postId = const Uuid().v1();
 
-      // Create post object
       Post post = Post(
         description: description,
         uid: uid,
@@ -59,22 +51,15 @@ class FirestoreMethods {
         likes: [],
       );
 
-      // Convert to JSON and validate
       Map<String, dynamic> postJson = post.toJson();
-
-      // Validate crucial fields before saving
       if (postJson['profilImage'] == null) {
         print('Warning: profilImage is null in JSON, setting empty string');
         postJson['profilImage'] = '';
       }
 
-      // Debug print final JSON
       print('Final post JSON: $postJson');
-
-      // Save to Firestore
       await _firestore.collection('posts').doc(postId).set(postJson);
 
-      // Verify the saved data
       DocumentSnapshot savedDoc =
           await _firestore.collection('posts').doc(postId).get();
       Map<String, dynamic> savedData = savedDoc.data() as Map<String, dynamic>;
@@ -89,7 +74,6 @@ class FirestoreMethods {
     return res;
   }
 
-  /// Fungsi untuk mengambil profile image dari user collection
   Future<String?> _getUserProfileImage(String uid) async {
     try {
       DocumentSnapshot userDoc =
@@ -98,7 +82,6 @@ class FirestoreMethods {
       if (userDoc.exists) {
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
         String? photoUrl = userData['photoUrl'] as String?;
-
         print('Found user photoUrl: $photoUrl');
         return photoUrl;
       } else {
@@ -107,11 +90,9 @@ class FirestoreMethods {
     } catch (e) {
       print('Error fetching user profile image: $e');
     }
-
     return null;
   }
 
-  /// Fungsi helper untuk update profilImage pada post yang sudah ada
   Future<String> updatePostProfileImage(
     String postId,
     String newprofilImage,
@@ -127,7 +108,6 @@ class FirestoreMethods {
     }
   }
 
-  /// Fungsi untuk mengambil semua posts dengan enriched data
   Stream<QuerySnapshot<Map<String, dynamic>>> getPostsWithEnrichedData() {
     return _firestore
         .collection('posts')
@@ -135,7 +115,6 @@ class FirestoreMethods {
         .snapshots();
   }
 
-  /// Fungsi untuk fix semua posts yang memiliki profilImage kosong
   Future<void> fixAllPostsProfileImages() async {
     try {
       QuerySnapshot postsSnapshot =
@@ -164,23 +143,75 @@ class FirestoreMethods {
     }
   }
 
-  // like method to connect to firebase
   Future<void> likePost(String postId, String uid, List likes) async {
     print("Running likePost for postId: $postId, uid: $uid");
     try {
       if (likes.contains(uid)) {
-        // jika user sudah like → unlike
         await _firestore.collection('posts').doc(postId).update({
           'likes': FieldValue.arrayRemove([uid]),
         });
       } else {
-        // jika user belum like → tambahkan
         await _firestore.collection('posts').doc(postId).update({
           'likes': FieldValue.arrayUnion([uid]),
         });
       }
     } catch (e) {
       print('Error while liking/unliking post: $e');
+    }
+  }
+
+  Future<void> postComment({
+    required String postId,
+    required String text,
+    required String uid,
+    required String username,
+    required String profilePic,
+  }) async {
+    try {
+      if (text.isNotEmpty) {
+        String commentId = const Uuid().v1();
+
+        await _firestore
+            .collection('posts')
+            .doc(postId)
+            .collection('comments')
+            .doc(commentId)
+            .set({
+              'text': text,
+              'uid': uid,
+              'username': username,
+              'profilePic': profilePic,
+              'datePublished': DateTime.now(),
+            });
+      } else {
+        print("Komentar kosong!");
+      }
+    } catch (e) {
+      print("Error posting comment: $e");
+    }
+  }
+
+  // method untuk hapus post
+  Future<void> deletePost(String postId) async {
+    try {
+      // Hapus semua komentar dari subcollection "comments"
+      QuerySnapshot comments =
+          await _firestore
+              .collection('posts')
+              .doc(postId)
+              .collection('comments')
+              .get();
+
+      for (DocumentSnapshot doc in comments.docs) {
+        await doc.reference.delete();
+      }
+
+      // Hapus dokumen post
+      await _firestore.collection('posts').doc(postId).delete();
+
+      print('Post dan komentar berhasil dihapus.');
+    } catch (err) {
+      print('Error saat menghapus post: $err');
     }
   }
 }
