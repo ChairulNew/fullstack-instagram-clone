@@ -4,7 +4,6 @@ import 'package:fullstack_instagram_clone/resources/auth_methods.dart';
 import 'package:fullstack_instagram_clone/responsive/mobile_screen_layout.dart';
 import 'package:fullstack_instagram_clone/responsive/responsive_layout_screen.dart';
 import 'package:fullstack_instagram_clone/responsive/web_screen_layout.dart';
-import 'package:fullstack_instagram_clone/screens/home_screen.dart';
 import 'package:fullstack_instagram_clone/screens/signup_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/utils/utils.dart';

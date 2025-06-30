@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fullstack_instagram_clone/responsive/mobile_screen_layout.dart';
-import 'package:fullstack_instagram_clone/responsive/responsive_layout_screen.dart';
-import 'package:fullstack_instagram_clone/responsive/web_screen_layout.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/widgets/post_card.dart';
 

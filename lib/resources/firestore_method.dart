@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fullstack_instagram_clone/model/post.dart';
@@ -27,10 +26,8 @@ class FirestoreMethods {
         return "Error: Username is required";
       }
 
-      // Convert image to base64
       String photoUrl = 'data:image/jpeg;base64,${base64Encode(file)}';
 
-      // Handle profilImage - jika kosong, coba ambil dari user profile
       String finalprofilImage = profilImage;
       if (profilImage.isEmpty || profilImage.trim().isEmpty) {
         print('profilImage is empty, trying to fetch from user profile...');
@@ -58,8 +55,7 @@ class FirestoreMethods {
         postId: postId,
         datePublished: DateTime.now(),
         postUrl: photoUrl,
-        profilImage:
-            finalprofilImage, // Gunakan finalprofilImage yang sudah divalidasi
+        profilImage: finalprofilImage,
         likes: [],
       );
 
@@ -165,6 +161,26 @@ class FirestoreMethods {
       print('Finished fixing profile images for all posts');
     } catch (e) {
       print('Error fixing posts profile images: $e');
+    }
+  }
+
+  // like method to connect to firebase
+  Future<void> likePost(String postId, String uid, List likes) async {
+    print("Running likePost for postId: $postId, uid: $uid");
+    try {
+      if (likes.contains(uid)) {
+        // jika user sudah like → unlike
+        await _firestore.collection('posts').doc(postId).update({
+          'likes': FieldValue.arrayRemove([uid]),
+        });
+      } else {
+        // jika user belum like → tambahkan
+        await _firestore.collection('posts').doc(postId).update({
+          'likes': FieldValue.arrayUnion([uid]),
+        });
+      }
+    } catch (e) {
+      print('Error while liking/unliking post: $e');
     }
   }
 }

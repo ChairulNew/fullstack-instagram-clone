@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fullstack_instagram_clone/resources/auth_methods.dart';
@@ -10,7 +9,6 @@ import 'package:fullstack_instagram_clone/screens/login_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/utils/utils.dart';
 import 'package:fullstack_instagram_clone/widgets/text_field_input.dart';
-import 'package:image/image.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SignupScreen extends StatefulWidget {
