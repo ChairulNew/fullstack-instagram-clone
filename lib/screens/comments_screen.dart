@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fullstack_instagram_clone/providers/user_provider.dart';
@@ -63,7 +65,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     var comment = snapshot.data!.docs[index];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: NetworkImage(comment['profilePic']),
+                        backgroundImage: _buildProfileImage(
+                          comment['profilePic'],
+                        ),
                       ),
                       title: Text(comment['username']),
                       subtitle: Text(comment['text']),
@@ -87,7 +91,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundImage: NetworkImage(user!.photoUrl),
+                    backgroundImage: _buildProfileImage(user!.photoUrl),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -110,5 +114,30 @@ class _CommentsScreenState extends State<CommentsScreen> {
         ],
       ),
     );
+  }
+
+  ImageProvider _buildProfileImage(String? imageString) {
+    const defaultUrl =
+        'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
+
+    if (imageString == null || imageString.trim().isEmpty) {
+      return const NetworkImage(defaultUrl);
+    }
+
+    if (imageString.startsWith('data:image')) {
+      try {
+        final base64Data = imageString.split(',').last;
+        Uint8List bytes = base64Decode(base64Data);
+        return MemoryImage(bytes);
+      } catch (_) {
+        return const NetworkImage(defaultUrl);
+      }
+    }
+
+    if (imageString.startsWith('http')) {
+      return NetworkImage(imageString);
+    }
+
+    return const NetworkImage(defaultUrl);
   }
 }

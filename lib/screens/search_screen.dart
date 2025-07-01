@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:fullstack_instagram_clone/screens/profile_screen.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: mobileBackgroundColor,
       appBar: AppBar(
         backgroundColor: mobileBackgroundColor,
         title: TextFormField(
@@ -49,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildUserSearchResult() {
-    return FutureBuilder(
+    return FutureBuilder<QuerySnapshot>(
       future:
           FirebaseFirestore.instance
               .collection('users')
@@ -70,13 +72,23 @@ class _SearchScreenState extends State<SearchScreen> {
         return ListView.builder(
           itemCount: docs.length,
           itemBuilder: (context, index) {
-            var user = docs[index].data();
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: _buildProfileImage(user['photoUrl']),
+            var user = docs[index].data() as Map<String, dynamic>;
+            var userId = docs[index].id;
+
+            return InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProfileScreen(uid: userId),
+                  ),
+                );
+              },
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: _buildProfileImage(user['photoUrl']),
+                ),
+                title: Text(user['username'] ?? ''),
               ),
-              title: Text(user['username'] ?? ''),
-              subtitle: Text(user['email'] ?? ''),
             );
           },
         );
@@ -84,6 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// 🔍 Widget untuk grid Explore
   Widget _buildExploreGrid() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('posts').snapshots(),
@@ -93,6 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
         }
 
         final posts = snapshot.data!.docs;
+
         return Padding(
           padding: const EdgeInsets.all(4.0),
           child: MasonryGridView.count(
@@ -113,12 +127,14 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// 🖼️ Builder untuk foto profil
   ImageProvider _buildProfileImage(String? imageString) {
     const defaultUrl =
         'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
     if (imageString == null || imageString.trim().isEmpty) {
       return const NetworkImage(defaultUrl);
     }
+
     if (imageString.startsWith('data:image')) {
       try {
         final base64Data = imageString.split(',').last;
@@ -128,16 +144,18 @@ class _SearchScreenState extends State<SearchScreen> {
         return const NetworkImage(defaultUrl);
       }
     }
+
     if (imageString.startsWith('http')) {
       return NetworkImage(imageString);
     }
+
     return const NetworkImage(defaultUrl);
   }
 
+  /// 🖼️ Builder untuk post image
   Widget _buildPostImage(String? postUrl) {
-    if (postUrl == null) {
-      return const Icon(Icons.broken_image);
-    }
+    if (postUrl == null) return const Icon(Icons.broken_image);
+
     if (postUrl.startsWith('data:image')) {
       try {
         final base64Data = postUrl.split(',').last;
@@ -147,6 +165,7 @@ class _SearchScreenState extends State<SearchScreen> {
         return const Icon(Icons.error);
       }
     }
+
     return Image.network(postUrl, fit: BoxFit.cover);
   }
 }

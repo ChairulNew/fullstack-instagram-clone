@@ -3,7 +3,10 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:fullstack_instagram_clone/model/user.dart' as model;
+import 'package:fullstack_instagram_clone/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,6 +26,7 @@ class AuthMethods {
     required String username,
     required String bio,
     required Uint8List file,
+    BuildContext? context,
   }) async {
     String res = "some error occurred";
     try {
@@ -56,6 +60,18 @@ class AuthMethods {
             .doc(cred.user!.uid)
             .set(user.toJson());
 
+        // Refresh user provider setelah signup berhasil
+        if (context != null && context.mounted) {
+          try {
+            await Provider.of<UserProvider>(
+              context,
+              listen: false,
+            ).refreshUser();
+          } catch (e) {
+            print("Error refreshing user after signup: $e");
+          }
+        }
+
         res = 'success';
       } else {
         res = 'Please fill all the fields';
@@ -67,15 +83,54 @@ class AuthMethods {
     return res;
   }
 
-  // handle login
+  // handle login - dengan context untuk refresh provider
   Future<String> loginUser({
+    required String email,
+    required String password,
+    BuildContext? context,
+  }) async {
+    String res = "validasi error";
+
+    try {
+      if (email.isNotEmpty && password.isNotEmpty) {
+        // Fixed: should be AND not OR
+        await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+
+        // Refresh user provider setelah login berhasil
+        if (context != null && context.mounted) {
+          try {
+            await Provider.of<UserProvider>(
+              context,
+              listen: false,
+            ).refreshUser();
+            print("User provider refreshed after login");
+          } catch (e) {
+            print("Error refreshing user after login: $e");
+          }
+        }
+
+        res = "success";
+      } else {
+        res = 'tolong isi input';
+      }
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  // handle login tanpa context (untuk backward compatibility)
+  Future<String> loginUserSimple({
     required String email,
     required String password,
   }) async {
     String res = "validasi error";
 
     try {
-      if (email.isNotEmpty || password.isNotEmpty) {
+      if (email.isNotEmpty && password.isNotEmpty) {
         await _auth.signInWithEmailAndPassword(
           email: email,
           password: password,
@@ -88,5 +143,19 @@ class AuthMethods {
       res = err.toString();
     }
     return res;
+  }
+
+  Future<void> signOut({BuildContext? context}) async {
+    await _auth.signOut();
+
+    // Clear user provider setelah logout
+    if (context != null && context.mounted) {
+      try {
+        Provider.of<UserProvider>(context, listen: false).clearUser();
+        print("User provider cleared after logout");
+      } catch (e) {
+        print("Error clearing user after logout: $e");
+      }
+    }
   }
 }
