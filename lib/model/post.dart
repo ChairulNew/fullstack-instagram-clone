@@ -7,7 +7,7 @@ class Post {
   final String postId;
   final DateTime datePublished;
   final String postUrl;
-  final String profilImage; // Pastikan ini tidak nullable
+  final String profilImage;
   final List likes;
 
   const Post({
@@ -28,7 +28,7 @@ class Post {
     "postId": postId,
     "datePublished": datePublished,
     "postUrl": postUrl,
-    "profilImage": profilImage, // Pastikan ini tidak null
+    "profilImage": profilImage,
     "likes": likes,
   };
 
@@ -43,14 +43,11 @@ class Post {
       datePublished:
           (snapshot['datePublished'] as Timestamp?)?.toDate() ?? DateTime.now(),
       postUrl: snapshot['postUrl'] ?? '',
-      profilImage:
-          snapshot['profilImage'] ??
-          '', // Handle null dengan default empty string
+      profilImage: snapshot['profilImage'] ?? '',
       likes: List.from(snapshot['likes'] ?? []),
     );
   }
 
-  /// Factory constructor dengan null safety yang lebih robust
   factory Post.fromMap(Map<String, dynamic> map) {
     return Post(
       description: (map['description'] as String?) ?? '',
@@ -62,13 +59,11 @@ class Post {
               ? (map['datePublished'] as Timestamp).toDate()
               : DateTime.now(),
       postUrl: (map['postUrl'] as String?) ?? '',
-      profilImage:
-          (map['profilImage'] as String?) ?? '', // Default empty string
+      profilImage: (map['profilImage'] as String?) ?? '',
       likes: List.from(map['likes'] ?? []),
     );
   }
 
-  /// Method untuk membuat copy dengan perubahan
   Post copyWith({
     String? description,
     String? uid,

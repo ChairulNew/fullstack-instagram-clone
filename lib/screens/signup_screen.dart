@@ -209,7 +209,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 const SizedBox(height: 12),
 
-                // Sudah punya akun
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

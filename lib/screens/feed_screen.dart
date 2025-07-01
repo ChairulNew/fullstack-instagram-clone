@@ -110,19 +110,15 @@ class _FeedScreenState extends State<FeedScreen> {
         enrichedData['profilImage'].toString().trim().isEmpty) {
       print('profilImage is null/empty for doc: $docId');
 
-      // Coba ambil profilImage dari user collection berdasarkan uid
       _fetchUserProfileImage(enrichedData['uid']).then((userProfilImage) {
         if (userProfilImage != null) {
           print('Found profilImage from users collection: $userProfilImage');
-          // Update akan terjadi pada build selanjutnya
         }
       });
 
-      // Set default untuk sementara
       enrichedData['profilImage'] = null;
     }
 
-    // Ensure required fields exist
     enrichedData['username'] = enrichedData['username'] ?? 'Unknown User';
     enrichedData['description'] = enrichedData['description'] ?? '';
     enrichedData['datePublished'] =
@@ -135,7 +131,6 @@ class _FeedScreenState extends State<FeedScreen> {
     return enrichedData;
   }
 
-  /// Fungsi untuk mengambil profilImage dari collection users
   Future<String?> _fetchUserProfileImage(String? uid) async {
     if (uid == null || uid.isEmpty) return null;
 

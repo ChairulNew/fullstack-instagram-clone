@@ -96,7 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  /// 🔍 Widget untuk grid Explore
+  /// Widget untuk grid Explore
   Widget _buildExploreGrid() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('posts').snapshots(),
@@ -127,7 +127,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  /// 🖼️ Builder untuk foto profil
+  /// Builder untuk foto profil
   ImageProvider _buildProfileImage(String? imageString) {
     const defaultUrl =
         'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg';
@@ -152,7 +152,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return const NetworkImage(defaultUrl);
   }
 
-  /// 🖼️ Builder untuk post image
+  /// Builder untuk post image
   Widget _buildPostImage(String? postUrl) {
     if (postUrl == null) return const Icon(Icons.broken_image);
 

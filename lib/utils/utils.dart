@@ -47,5 +47,5 @@ Future<Uint8List?> pickImage(ImageSource source) async {
   }
 
   print("NO image selected");
-  return null; // penting agar bisa di-handle di UI
+  return null;
 }

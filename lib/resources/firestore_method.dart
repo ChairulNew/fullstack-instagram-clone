@@ -193,7 +193,7 @@ class FirestoreMethods {
   // method untuk hapus post
   Future<void> deletePost(String postId) async {
     try {
-      // Hapus semua komentar dari subcollection "comments"
+      // lakukan hapus komentar juga untuk post yang di pilih
       QuerySnapshot comments =
           await _firestore
               .collection('posts')

@@ -4,12 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:fullstack_instagram_clone/providers/user_provider.dart';
 import 'package:fullstack_instagram_clone/resources/auth_methods.dart';
 import 'package:fullstack_instagram_clone/utils/colors.dart';
 import 'package:fullstack_instagram_clone/utils/utils.dart';
 import 'package:fullstack_instagram_clone/widgets/follow_button.dart';
-import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String uid;
@@ -25,7 +23,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, authSnapshot) {
-        // Jika tidak ada user yang login, tampilkan loading atau redirect
         if (!authSnapshot.hasData || authSnapshot.data == null) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
