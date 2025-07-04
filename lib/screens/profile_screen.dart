@@ -90,7 +90,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   body: RefreshIndicator(
                     onRefresh: () async {
-                      // Force refresh dengan rebuild
                       setState(() {});
                     },
                     child: ListView(
@@ -151,7 +150,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   mobileBackgroundColor,
                                               textColor: primaryColor,
                                               borderColor: Colors.grey,
-                                              function: () {},
+                                              function: () {
+                                                _showEditProfileDialog(
+                                                  userData['name'] ?? '',
+                                                  userData['bio'] ?? '',
+                                                );
+                                              },
                                             )
                                             : isFollowing
                                             ? FollowButton(
@@ -221,6 +225,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showEditProfileDialog(String currentName, String currentBio) {
+    final nameController = TextEditingController(text: currentName);
+    final bioController = TextEditingController(text: currentBio);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Edit Profile'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                ),
+                TextField(
+                  controller: bioController,
+                  decoration: const InputDecoration(labelText: 'Bio'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(widget.uid)
+                        .update({
+                          'name': nameController.text.trim(),
+                          'bio': bioController.text.trim(),
+                        });
+                    Navigator.pop(context);
+                    if (mounted) {
+                      showSnackBar(context, 'Profile updated!');
+                    }
+                    setState(() {});
+                  } catch (e) {
+                    if (mounted) showSnackBar(context, 'Update failed: $e');
+                  }
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          ),
     );
   }
 
